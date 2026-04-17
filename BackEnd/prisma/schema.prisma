@@ -1,0 +1,238 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum Rol {
+  INVESTIGADOR
+  EXPLORADOR
+  ADMIN
+}
+
+enum EstadoFosil {
+  PENDIENTE
+  PUBLICADO
+  RECHAZADO
+}
+
+enum CategoriaFosil {
+  FOS
+  MIN
+  ROC
+  PAL
+}
+
+enum TipoImagen {
+  ANTES_EXTRACCION
+  DESPUES_LIMPIEZA
+  ANALISIS
+  GENERAL
+}
+
+enum NivelTaxonomico {
+  REINO
+  FILO
+  CLASE
+  ORDEN
+  FAMILIA
+  GENERO
+  ESPECIE
+}
+
+// ============================================
+// TABLAS DE REFERENCIA (para el código único y clasificaciones)
+// ============================================
+
+model Provincia {
+  id       Int      @id @default(autoincrement())
+  nombre   String
+  codigo   String   @unique
+
+  cantones Canton[]
+
+  @@map("provincias")
+}
+
+model Canton {
+  id          Int       @id @default(autoincrement())
+  nombre      String
+  codigo      String    @unique
+  provinciaId Int
+  provincia   Provincia @relation(fields: [provinciaId], references: [id])
+
+  fosiles Fosil[]
+
+  @@map("cantones")
+}
+
+model EraGeologica {
+  id       Int                @id @default(autoincrement())
+  nombre   String             @unique
+  periodos PeriodoGeologico[]
+
+  @@map("eras_geologicas")
+}
+
+model PeriodoGeologico {
+  id     Int          @id @default(autoincrement())
+  nombre String       @unique
+  eraId  Int
+  era    EraGeologica @relation(fields: [eraId], references: [id])
+
+  fosiles Fosil[]
+
+  @@map("periodos_geologicos")
+}
+
+// ============================================
+// TAXONOMIA (jerarquía auto-referenciada)
+// ============================================
+
+model Taxonomia {
+  id     Int              @id @default(autoincrement())
+  nombre String
+  nivel  NivelTaxonomico
+
+  padreId Int?
+  padre   Taxonomia?  @relation("jerarquia", fields: [padreId], references: [id])
+  hijos   Taxonomia[] @relation("jerarquia")
+
+  fosiles Fosil[]
+
+  @@unique([nombre, nivel])
+  @@map("taxonomias")
+}
+
+// ============================================
+// USUARIO
+// ============================================
+
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  nombre    String
+  pais      String?
+  profesion String?
+  telefono  String?
+  centro    String?
+  rol       Rol      @default(INVESTIGADOR)
+  activo    Boolean  @default(true)
+  creadoEn  DateTime @default(now())
+
+  fosilesRegistrados Fosil[] @relation("exploradorFosil")
+  fosilesRevisados   Fosil[] @relation("revisorFosil")
+
+  @@map("usuarios")
+}
+
+// ============================================
+// FOSIL (tabla central del sistema)
+// ============================================
+
+model Fosil {
+  id              Int            @id @default(autoincrement())
+  codigo          String?        @unique
+  nombre          String
+  descripcion     String
+  categoria       CategoriaFosil
+  estado          EstadoFosil    @default(PENDIENTE)
+
+  // Ubicación geográfica
+  latitud         Float?
+  longitud        Float?
+  ubicacionTexto  String?
+
+  // Contexto científico
+  contextoGeologico  String?
+  estadoOriginal     String?
+  composicion        String?
+  estudioIntro       String?
+  referencias        String?
+
+  // Descubrimiento
+  fechaHallazgo   DateTime?
+  quienEncontro   String?
+
+  // Relaciones
+  exploradorId    Int
+  explorador      Usuario          @relation("exploradorFosil", fields: [exploradorId], references: [id])
+
+  revisorId       Int?
+  revisor         Usuario?         @relation("revisorFosil", fields: [revisorId], references: [id])
+
+  cantonId        Int?
+  canton          Canton?          @relation(fields: [cantonId], references: [id])
+
+  periodoId       Int?
+  periodo         PeriodoGeologico? @relation(fields: [periodoId], references: [id])
+
+  taxonomiaId     Int?
+  taxonomia       Taxonomia?       @relation(fields: [taxonomiaId], references: [id])
+
+  // Control
+  activo          Boolean  @default(true)
+  creadoEn        DateTime @default(now())
+  editadoEn       DateTime @updatedAt
+
+  imagenes        Imagen[]
+  videos          Video[]
+
+  @@map("fosiles")
+}
+
+// ============================================
+// MULTIMEDIA
+// ============================================
+
+model Imagen {
+  id       Int        @id @default(autoincrement())
+  ruta     String
+  tipo     TipoImagen @default(GENERAL)
+  angulo   String?
+
+  fosilId  Int
+  fosil    Fosil      @relation(fields: [fosilId], references: [id])
+
+  @@map("imagenes")
+}
+
+model Video {
+  id          Int    @id @default(autoincrement())
+  ruta        String
+  descripcion String?
+
+  fosilId     Int
+  fosil       Fosil  @relation(fields: [fosilId], references: [id])
+
+  @@map("videos")
+}
+
+// ============================================
+// CONTACTO
+// ============================================
+
+model Contacto {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  email     String
+  mensaje   String
+  creadoEn  DateTime @default(now())
+
+  @@map("contactos")
+}
