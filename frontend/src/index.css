@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary: #1a3c2e;
+  --primary-light: #2d5e45;
+  --primary-dark: #0f2319;
+  --accent: #c9a84c;
+  --accent-light: #e0c76e;
+  --bg-main: #0d1b16;
+  --bg-card: #142822;
+  --bg-input: #1a3328;
+  --text-primary: #e8e0d0;
+  --text-secondary: #a09880;
+  --text-muted: #6b6355;
+  --border: #2d4a3c;
+  --danger: #c0392b;
+  --success: #27ae60;
+  --warning: #d4a017;
+  --radius: 12px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.3s;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--primary-dark);
+}
+
+.btn-primary:hover {
+  background: var(--accent-light);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--primary-light);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+  background: var(--primary);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: white;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-publicado { background: #1a3d2e; color: #4ade80; }
+.badge-pendiente { background: #3d3520; color: #fbbf24; }
+.badge-rechazado { background: #3d1f1f; color: #f87171; }
+.badge-fos { background: #1a2f3d; color: #60a5fa; }
+.badge-min { background: #3d2f1a; color: #f59e0b; }
+.badge-roc { background: #2d2d2d; color: #a1a1aa; }
+.badge-pal { background: #2d1a3d; color: #c084fc; }
